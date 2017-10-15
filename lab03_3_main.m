@@ -1,0 +1,359 @@
+function lab03_main
+%=== Дисципліна:Основи обробки біомедичної інформації ===
+%--- Лабораторна робота #3 ФІЛЬТРАЦІЯ БІОСИГНАЛІВ ФІЛЬТРАМИ З НІХ
+%
+% Використовуйте файли даних: 
+%   ecg105.txt - сигнал ЕКГ
+%   ecg2x60.dat - сигнал ЕКГ з мережевою перешкодою частотою 60 Гц
+%
+%----------------------------------------------------------
+
+
+clear, clc, close all
+disp('Лабораторна робота #3')
+disp('ФІЛЬТРАЦІЯ БІОСИГНАЛІВ ФІЛЬТРАМИ З НІХ')
+disp('Виконала:     Cоколова Марина, група БМ-461 ННІІДС')
+
+%=== Завдання #1.1 ===
+% Синтезування смугового фільтру 2-го порядку 
+fs = 200; 
+fc = 20;                % центральна частота
+phi = 2*pi*fc/fs;
+r = 0.6;
+b = [1 0 -1];           % чисельник CФ 
+a = [1 -2*r*cos(phi) r^2]; 	% знаменник
+
+%=== Завдання #1.2 ===
+% АЧХ та ФЧХ смугового фільтру 2-го порядку
+n =512;   % кількість точок, що розраховуються
+figure(1)
+[h,w] = freqz(b,a,n);
+mag=abs(h); phase=angle(h)*180/pi;
+subplot(3,1,1); plot(w/(2*pi)*fs,mag), grid on
+title('АЧХ смугового фільтру 2-го порядку')
+xlabel('Частота'); ylabel('Амплітуда')
+subplot(3,1,2); plot(w/(2*pi)*fs,unwrap(phase)), grid on
+title('ФЧХ смугового фільтру 2-го порядку')
+xlabel('Частота'); ylabel('Амплітуда')
+
+% Обчислення нулів та полюсів фільтру
+disp('Нулі фільтру') 
+x = roots(b);
+disp(x)
+% Карта нулів та полюсів фільтру
+subplot(3,1,3); k=zplane(x); grid on
+
+
+
+%=== Завдання #1.3 ===
+% r = 0.7
+r1 = 0.7;
+b1=[1 0 -1];
+a1 =[1 -2*r1*cos(phi) r1^2];	% знаменник
+figure(2)
+[h1,w1] = freqz(b1,a1,n);
+mag1=abs(h1); phase1=angle(h1)*180/pi;
+subplot(3,1,1); plot(w1/(2*pi)*fs,mag1,'green'), grid on
+title({'АЧХ смугового фільтру 2-го порядку';'Характеристики фільтру 2-го порядку при r = 0.7'})
+xlabel('Частота'); ylabel('Амплітуда')
+subplot(3,1,2); plot(w1/(2*pi)*fs,unwrap(phase1),'green'), grid on
+title('ФЧХ смугового фільтру 2-го порядку')
+xlabel('Частота'); ylabel('Амплітуда')
+
+% Обчислення нулів та полюсів фільтру
+disp('Нулі фільтру') 
+x1 = roots(b1);
+disp(x1)
+% Карта нулів та полюсів фільтру
+subplot(3,1,3); k1=zplane(x1); grid on
+
+% r = 0.9
+r2 = 0.9;
+b2 =[1 0 -1];               % чисельник CФ 
+a2 =[1 -2*r2*cos(phi) r2^2]; 	% знаменник
+figure(3)
+[h2,w2] = freqz(b2,a2,n);
+mag2=abs(h2); phase2=angle(h2)*180/pi;
+subplot(3,1,1); plot(w2/(2*pi)*fs,mag2,'red'), grid on
+title({'АЧХ смугового фільтру 2-го порядку';'Характеристики фільтру 2-го порядку при r = 0.9'})
+xlabel('Частота'); ylabel('Амплітуда')
+subplot(3,1,2); plot(w2/(2*pi)*fs,unwrap(phase2),'red'), grid on
+title('ФЧХ смугового фільтру 2-го порядку')
+xlabel('Частота'); ylabel('Амплітуда')
+xlim([0 40])
+
+% Обчислення нулів та полюсів фільтру
+disp('Нулі фільтру') 
+x2 = roots(b2);
+disp(x2)
+% Карта нулів та полюсів фільтру
+subplot(3,1,3); k1=zplane(x2); grid on
+
+figure(4)
+subplot(2,1,1); plot(w/(2*pi)*fs,mag), grid on
+hold on
+title('АЧХ смугового фільтру 2-го порядку')
+xlabel('Частота'); ylabel('Амплітуда')
+subplot(2,1,2); plot(w/(2*pi)*fs,unwrap(phase)), grid on
+hold on
+title('ФЧХ смугового фільтру 2-го порядку')
+xlabel('Частота'); ylabel('Амплітуда')
+
+subplot(2,1,1); plot(w1/(2*pi)*fs,mag1,'green'), grid on
+subplot(2,1,2); plot(w1/(2*pi)*fs,unwrap(phase1),'green'), grid on
+subplot(2,1,1); plot(w2/(2*pi)*fs,mag2,'red'), grid on
+hold off
+subplot(2,1,2); plot(w2/(2*pi)*fs,unwrap(phase2),'red'), grid on
+hold off
+
+%%
+%=== Завдання #1.4 ===
+% Визначення добротності заданих фільтрів 
+q=fc./(w/(2*pi)*fs);
+% disp(q)
+%%
+%=== Завдання #1.5 ===
+%Побудува графіків перехідних процесів
+figure(5)
+subplot(3,1,1), stepz(b,a,n); xlim([0.9 20])
+subplot(3,1,2), stepz(b1,a1,n); xlim([0.9 20])
+subplot(3,1,3), stepz(b2,a2,n); xlim([0.9 20])
+%%
+%=== Завдання #2.1 ===
+% Фільтрація ЕКГ при r = 0.6
+fs=200;
+ecg=load('ecg105.txt'); % сигнал ЕКГ
+ecg=detrend(ecg);
+ecgf = filter(b,a,ecg);
+t=(0:length(ecgf)-1)/fs;
+figure(6)
+subplot(2,1,1); plot(t,ecg,'red'), grid on
+xlim([0.5 2.5]); ylim([-200 200])
+title('Зареєстрований сигнал ЕКГ')
+xlabel('Час (t)'); ylabel('Амплітуда')
+subplot(2,1,2); plot(t,ecgf), grid on
+xlim([0.5 2.5]); ylim([-200 200])
+title('Bідфільтрований cигнал ЕКГ')
+xlabel('Час (t)'); ylabel('Амплітуда')
+
+
+%=== Завдання #2.2 ===
+% Фільтрація ЕКГ при r = 0.7 та r = 0.8
+% r = 0.7
+ecgf1 = filter(b1,a1,ecg);
+t=(0:length(ecgf1)-1)/fs;
+figure(7)
+subplot(2,1,1); plot(t,ecg,'red'), grid on
+xlim([0.5 2.5]); ylim([-200 200])
+title('Зареєстрований сигнал ЕКГ')
+xlabel('Час (t)'); ylabel('Амплітуда')
+subplot(2,1,2); plot(t,ecgf1), grid on
+xlim([0.5 2.5]); ylim([-200 200])
+title('Bідфільтрований cигнал ЕКГ')
+xlabel('Час (t)'); ylabel('Амплітуда')
+
+% r = 0.9
+ecgf2 = filter(b2,a2,ecg);
+t=(0:length(ecgf2)-1)/fs;
+figure(8)
+subplot(2,1,1); plot(t,ecg,'red'), grid on
+xlim([0.5 2.5]); ylim([-200 200])
+title('Зареєстрований сигнал ЕКГ')
+xlabel('Час (t)'); ylabel('Амплітуда')
+subplot(2,1,2); plot(t,ecgf2), grid on
+xlim([0.5 2.5]); ylim([-200 200])
+title('Bідфільтрований cигнал ЕКГ')
+xlabel('Час (t)'); ylabel('Амплітуда')
+
+%%
+%=== Завдання #3.1 ===
+% Дослідження властивостей режекторного НІХ-фільтру
+fs = 200;
+r =  0.8;
+phi1 = 110*pi/180;
+phi2 = 130*pi/180;
+a1 =  [1 -2*r*cos(phi1) r^2];
+a2 = [1 -2*r*cos(phi2) r^2];
+a = conv(a1,a2);
+b = [1 1 1]/3;
+disp('Передавальна функція режекторного НІХ-фільтру')
+H =  filt (b,a);  % передавальна функція
+
+%=== Завдання #3.2 ===
+% АЧХ та ФЧХ смугового режекторного НІХ-фільтру
+n = 512;  % кількість точок, що розраховуються
+figure(9)
+[h,w] = freqz(b,a,n);
+mag=abs(h); phase=angle(h)*180/pi;
+subplot(3,1,1); plot(w/(2*pi)*fs,mag), grid on
+title('АЧХ смугового режекторного НІХ-фільтру')
+xlabel('Частота'); ylabel('Амплітуда')
+subplot(3,1,2); plot(w/(2*pi)*fs,unwrap(phase)), grid on
+title('ФЧХ смугового режекторного НІХ-фільтру')
+xlabel('Частота'); ylabel('Амплітуда')
+
+% Обчислення нулів та полюсів фільтру
+disp('Нулі режекторного НІХ-фільтру') 
+x = roots(b);
+disp(x)
+
+% Карта нулів та полюсів фільтру
+subplot(3,1,3); k=zplane(x); grid on
+
+
+%=== Завдання #3.3 ===
+% Порівняння АЧХ і ФЧХ режекторних НІХ і СІХ-фильтрів
+open('CIX_filter.fig')
+
+
+%=== Завдання #3.4 ===
+% Фільтрацію сигналу ЕКГ(файл ecg2x60.dat) режекторним фільтром
+ecg=load('ecg2x60.dat');
+ecgf = filter(b,a,ecg);
+t=(0:length(ecg)-1)/fs;
+figure(11)
+subplot(2,1,1); plot(t,ecg,'red'), grid on
+xlim([0 1])
+title('Зареєстрований сигнал ЕКГ')
+xlabel('Час (t)'); ylabel('Амплітуда')
+subplot(2,1,2); plot(t,ecgf), grid on
+xlim([0 1]); 
+title('Bідфільтрований cигнал ЕКГ')
+xlabel('Час (t)'); ylabel('Амплітуда')
+
+%%
+%=== Завдання #4.1 ===
+% АЧХ і ФЧХ цифрових інтеграторів
+% Інтегрування методом прямокутників 
+fs = 300;      % частота дискретизації
+T = 1/fs; 
+b =T*1;          % чисельник ПФ
+a = [1 -1];      % знаменник ПФ
+% Інтегрування методом трапецій.
+b1 = [1 1]*T/2;
+a1 = [1 -1];
+% Інтегрування методом парабол (Сімпсона)
+b2 = [1 4 1]*T/3;
+a2 = [1 0 -1];
+
+n = 512;   % кількість точок, що розраховуються
+[h,f] = freqz(b,a,n);
+mag=abs(h); phase=angle(h)*180/pi;
+[h1,f1] = freqz(b1,a1,n);
+mag1=abs(h1); phase1=angle(h1)*180/pi;
+[h2,f2] = freqz(b2,a2,n);
+mag2=abs(h2); phase2=angle(h2)*180/pi;
+figure(12)
+subplot(2,3,1); plot(f/(2*pi)*fs,mag), grid on
+ylim([-0.1 0.6]); xlim([-5 155])
+title({'АЧХ інтеграторів методами';'прямокутників'})
+xlabel('Частота'); ylabel('Амплітуда')
+subplot(2,3,4); plot(f/(2*pi)*fs,unwrap(phase)), grid on
+ylim([-10 90]); xlim([-5 155])
+title({'ФЧХ інтеграторів методами';'прямокутників'})
+xlabel('Частота'); ylabel('Амплітуда')
+subplot(2,3,2); plot(f1/(2*pi)*fs,mag1), grid on
+ylim([-0.1 0.6]); xlim([-5 155])
+title('трапецій'); xlabel('Частота'); ylabel('Амплітуда')
+subplot(2,3,5); plot(f1/(2*pi)*fs,unwrap(phase1)), grid on
+ylim([-2.2 0.1]); xlim([-10 155])
+title('трапецій'); xlabel('Частота'); ylabel('Амплітуда')
+subplot(2,3,3); plot(f2/(2*pi)*fs,mag2), grid on
+ylim([-0.1 0.6]); xlim([-5 155])
+title('парабол (Сімпсона)'); xlabel('Частота'); ylabel('Амплітуда')
+subplot(2,3,6); plot(f2/(2*pi)*fs,unwrap(phase2)), grid on
+ylim([-2.2 0.1]); xlim([-10 155])
+title('парабол (Сімпсона)'); xlabel('Частота'); ylabel('Амплітуда')
+
+
+%=== Завдання #4.2 ===
+% Обчислення нулів та полюсів інтеграторів
+disp('Нулі та полюси інтегратора методом прямокутників') 
+l = roots(b); g = roots(a);
+disp(l)
+disp(g)
+disp('Нулі та полюси  інтегратора методом трапецій') 
+l1 = roots(b1); g1 = roots(a);
+disp(l1)
+disp(g1)
+disp('Нулі та полюси  інтегратора методом парабол (Сімпсона)') 
+l2 = roots(b2); g2 = roots(a);
+disp(l2)
+disp(g2)
+
+figure(13)
+% Карта нулів та полюсів фільтру
+subplot(3,1,1); j=zplane(l,g); grid on
+title('Карта нулів та полюсів інтегратора методом прямокутників')
+ylabel('Im. Part')
+subplot(3,1,2); j1=zplane(l1,g1); grid on
+title('Карта нулів та полюсів інтегратора методом трапецій')
+ylabel('Im. Part')
+subplot(3,1,3); j2=zplane(l2,g2); grid on
+title('Карта нулів та полюсів інтегратора методом парабол (Сімпсона)')
+ylabel('Im. Part')
+
+% Передавальні функції інтеграторів
+disp('Передавальна функція інтегратора методом прямокутників') 
+H=filt(b,a)
+disp('Передавальна функція інтегратора методом трапецій') 
+H1=filt(b1,a1)
+disp('Передавальна функція інтегратора методом парабол (Сімпсона)') 
+H2=filt(b2,a2)
+
+
+%%
+%=== Завдання #4.3 ===
+% Обчислення абсолютної похибки АЧХ
+figure(14)
+subplot(2,1,1)
+mag0 =1./(2*pi*f);  % АЧХ ідеального інтегратора 
+loglog(f,mag0,f,mag); grid on
+title('Графік похибки інтегратора методом прямокутників')
+err = (mag-mag0)*100;
+subplot(2,1,2); 
+plot(f,err); grid on	
+ylim([-3000 500]); xlim([-0.2 3.5])
+
+figure(15)
+subplot(2,1,1)
+mag01 =1./(2*pi*f1);  % АЧХ ідеального інтегратора 
+loglog(f1,mag01,f1,mag1); grid on
+title('Графік похибки інтегратора методом трапецій')
+err1 = (mag1-mag01)*100;
+subplot(2,1,2); 
+plot(f1,err1); grid on	
+ylim([-3000 500]); xlim([-0.2 3.5])
+
+figure(16)
+subplot(2,1,1)
+mag02 =1./(2*pi*f2);  % АЧХ ідеального інтегратора 
+loglog(f2,mag02,f2,mag2); grid on
+title('Графік похибки інтегратора методом парабол (Сімпсона)')
+err2 = (mag2-mag02)*100;
+subplot(2,1,2); 
+plot(f2,err2); grid on	
+ylim([-3000 500]); xlim([-0.2 3.5])
+
+%%
+%=== Завдання #4.4 ===
+% Інтегрування сигналу ЕКГ (файл ecg105.txt) інтеграторами 
+fs = 200;
+ecg = load('ecg105.txt'); % сигнал ЕКГ
+ecgd = detrend(ecg);
+figure(17)
+% інтегратор за методом прямокутників
+fti=filter(b,a,ecgd);
+subplot(3,1,1); plot(fti), grid on
+axis tight
+title('Інтегрування сигналу ЕКГ за методом прямокутників')
+% інтегратор за методом трапецій
+fti1=filter(b1,a1,ecgd);
+subplot(3,1,2); plot(fti1), grid on
+axis tight
+title('Інтегрування сигналу ЕКГ за методом трапецій')
+% інтегратор за методом парабол (Сімпсона)
+fti2=filter(b2,a2,ecgd);
+subplot(3,1,3); plot(fti2), grid on
+axis tight
+title('Інтегрування сигналу ЕКГ методом парабол (Сімпсона)')
