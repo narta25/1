@@ -1,45 +1,34 @@
+//including the serial ports external lybrary
 import processing.serial.*;
-Serial MyPort;
+Serial myPort;
+//Creating an object for the image
 PImage logo;
- 
-// Global constants
-final int BAUD_RATE       = 19200; // must be the same as the Arduino
-final String LOGO_ADDRESS = "http://www.arduino.cc/arduino_logo.png";
- 
-// Global variables
-int bgcolor = 0; // holds the background color
- 
-void setup() {
-    size(1, 1);
-    surface.setResizable(true);
-    // set the color mode to Hue/Saturation/Brightness
-    colorMode(HSB, 255);
- 
-    // load the Arduino logo into the PImage instance
-    logo = loadImage(LOGO_ADDRESS);
- 
-    // make the window the same size as the image
-    surface.setSize(logo.width, logo.height);
- 
-    // print a list of available serial ports to the
-    // Processing staus window
-    println("Available serial ports:");
-    println(Serial.list());
- 
-    // Tell the serial object the information it needs to communicate
-    MyPort = new Serial(this, Serial.list()[0], BAUD_RATE);
+//Creating a variable to store the background colour
+int bgcolor=0;
+void setup(){
+ //Setting the colour mode. In this case we're useing HSB(HueSaturationBrightness). The hue will change while turning the potentiometer.
+ colorMode(HSB,255);
+ //loading the image directly form the Internet
+ logo=loadImage("http://arduino.cc/logo.png");
+ // you can use "size(logo.width,logo.height)" to automatically adjust the scale
+ //if you have problems, adjust it manually:
+ size(170,120);
+ //Printing a list with all the serial ports your computer has when the program first starts.
+ println("Available serial ports:");
+ printArray(Serial.list());
+ //Telling Processing information about the serial connection. The parameters are: which application will be speaking to, which serial port will be communicating(depending on the previous result), and at what speed.
+ myPort=new Serial(this,Serial.list()[0],9600);
 }
- 
-void draw() {
-    if (MyPort.available() > 0) {
-        // read and print for easy debugging
-        bgcolor = MyPort.read();
-        println(bgcolor);
- 
-        // draw the background by RGB color (each channel ranges 0-255)
-        background(bgcolor, 255, 255);
- 
-        // draw the Arduino logo
-        image(logo, 0, 0);
-    }
+//Analog function to void loop() in Arduino
+void draw(){
+ //Reading Arduino data from the serial port
+ if(myPort.available()>0){
+ bgcolor=myPort.read();
+ println(bgcolor);
+ }
+ //changing the image background
+ background(bgcolor,255,255);
+ //Displaying the image and starting drawing on top left (0.0)
+ image(logo,0,0);
 }
+
